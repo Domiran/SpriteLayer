@@ -6,52 +6,79 @@ using System.Threading.Tasks;
 
 namespace SpriteLayer
 {
-    internal class Pixel
+    /// <summary>
+    /// Pixel is a representation of a pixel in the final rendered image.
+    /// 
+    /// Each Pixel can have its own own Layer order.
+    /// </summary>
+    public struct Pixel
     {
-        public Point Position { get; private set; } // location of this pixel
-        public List<Layer> Layers { get; private set; } // layers of this pixel, with implied ordering
+        /// <summary>
+        /// Location of this pixel.
+        /// </summary>
+        private Point _position;
+
+        /// <summary>
+        /// Layers of this pixel, with implied ordering (index 0 is first layer).
+        /// </summary>
+        private List<IReadOnlyLayer> _layers;
+        public Color Color { get; private set; }
 
         public Pixel(Point pos)
         {
-            Position = pos;
-            Layers = new List<Layer>();
+            Color = Color.White;
+            _position = pos;
+            _layers = new List<IReadOnlyLayer>();
+        }
+        
+        public Pixel(int x, int y)
+        {
+            Color = Color.White;
+            _position = new Point(x, y);
+            _layers = new List<IReadOnlyLayer>();
         }
 
-        public void AddLayer(Layer layer)
+        public void CalculateColor()
+        {
+            if (_layers.Count == 0)
+            {
+                Color = Color.Transparent;
+            }
+
+            else
+            {
+                foreach (var layer in _layers)
+                {
+                    var color = layer[_position];
+                    if (color.A > 0)
+                    {
+                        Color = color;
+                        return;
+                    }
+                }
+               Color = Color.Transparent;
+            }
+        }
+
+        public void AddLayer(IReadOnlyLayer layer)
         {
             // new layers go on top
-            Layers.Insert(0, layer);
-        }
-
-        public Color Color
-        {
-            get
-            {
-                // 0 is top-most layer
-                if(Layers.Count == 0)
-                    return Color.White;
-
-                foreach (var layer in Layers)
-                {
-                    var color = layer[Position];
-                    if (color.A > 0)
-                        return color;
-                }
-                return Color.Transparent;
-            }
+            _layers.Insert(0, layer);
+            CalculateColor();
         }
 
         // returns true if we moved
         public bool MoveLayerDown(int index)
         {
             var nextIndex = index + 1;
-            if (nextIndex < Layers.Count)
+            if (nextIndex < _layers.Count)
             {
                 // this resets all custom pixel ordering
  
-                var temp = Layers[nextIndex];
-                Layers[nextIndex] = Layers[index];
-                Layers[index] = temp;
+                var temp = _layers[nextIndex];
+                _layers[nextIndex] = _layers[index];
+                _layers[index] = temp;
+                CalculateColor();
                 return true;
             }
             return false;
@@ -65,12 +92,48 @@ namespace SpriteLayer
             {
                 // this resets all custom pixel ordering
 
-                var temp = Layers[prevIndex];
-                Layers[prevIndex] = Layers[index];
-                Layers[index] = temp;
+                var temp = _layers[prevIndex];
+                _layers[prevIndex] = _layers[index];
+                _layers[index] = temp;
+                CalculateColor();
                 return true;
             }
             return false;
+        }
+
+        public void SetLayers(List<IReadOnlyLayer> layers)
+        {
+            _layers.Clear();
+            _layers.AddRange(layers);
+            CalculateColor();
+        }
+        
+        public void SetLayers(List<Layer> layers)
+        {
+            _layers.Clear();
+            _layers.AddRange(layers);
+            CalculateColor();
+        }
+        
+        public void SetLayers(System.ComponentModel.BindingList<Layer> layers)
+        {
+            _layers.Clear();
+            _layers.AddRange(layers);
+            CalculateColor();
+        }
+
+        public void RemoveLayer(IReadOnlyLayer layer)
+        {
+            _layers.Remove(layer);
+            CalculateColor();
+        }
+
+        public IReadOnlyList<IReadOnlyLayer> Layers
+        {
+            get
+            {
+                return _layers;
+            }
         }
     }
 }

@@ -6,16 +6,25 @@ using System.Threading.Tasks;
 
 namespace SpriteLayer
 {
-    internal class Sprite
+    /// <summary>
+    /// A sprite is a collection of layers, which can be ordered to form a final sprite sheet.
+    /// </summary>
+    public class Sprite : IDisposable
     {
         private Bitmap _lastRender; // cached representation of the final image
         public System.ComponentModel.BindingList<Layer> Layers { get; private set; } // all sheets
-        private List<Pixel> _pixels; // all pixels in the final image
+
+        /// <summary>
+        /// All pixels in the final image.
+        /// </summary>
+        private Pixel[] _pixels; 
         public Size SpriteFrameSize { get; set; }
 
         public delegate void RenderUpdateDelegate(Bitmap render);
 
         private event RenderUpdateDelegate? RenderUpdate;
+
+        private delegate void PixelActionDelegate(ref Pixel p);
 
         public Size SpriteSheetSize
         {
@@ -92,7 +101,7 @@ namespace SpriteLayer
         {
             RenderUpdate += renderUpdate;
             Layers = new System.ComponentModel.BindingList<Layer>();
-            _pixels = new List<Pixel>();
+            _pixels = new Pixel[1]; // mostly to shut the compiler up
             SpriteFrameSize = new Size(256, 256);
             _lastRender = new Bitmap(256, 256);
             using Graphics g = Graphics.FromImage(_lastRender);
@@ -129,28 +138,36 @@ namespace SpriteLayer
             // we don't care what this does to any custom pixel layering
 
             Layers.Remove(layer);
-            var removesheet = void (Pixel p) => p.Layers.Remove(layer);
-            ForEachPixelObject(removesheet);
+            PixelActionDelegate removeLayerFn = void (ref Pixel p) => p.RemoveLayer(layer);
+            ForEachPixelObject(removeLayerFn);
             Render();
         }
 
-        private void AddLayerInternal(Layer sheet)
+        private void AddLayerInternal(Layer layer)
         {
             // new layers go on top
 
-            var addsheet = (Pixel p) => p.AddLayer(sheet);
-            ForEachPixelObject(addsheet);
+            PixelActionDelegate addLayerFn = (ref Pixel p) => p.AddLayer(layer);
+            ForEachPixelObject(addLayerFn);
+        }
+
+        public void SetLayerShade(Layer layer, Color shade)
+        {
+            layer.Shade = shade;
+
+            PixelActionDelegate calcLayerFn = (ref Pixel p) => p.CalculateColor();
+            ForEachPixelObject(calcLayerFn);
             Render();
         }
 
-        private void ForEachPixelObject(Action<Pixel> pred)
+        private void ForEachPixelObject(PixelActionDelegate pred)
         {
             var sz = SpriteSheetSize;
             var totalPixels = sz.Width * sz.Height;
-            foreach (var pixel in _pixels)
+            Parallel.For(0, _pixels.Length, index =>
             {
-                pred(pixel);
-            }
+                pred(ref _pixels[index]);
+            });
         }
 
         private void SetupLayeringArray()
@@ -163,17 +180,19 @@ namespace SpriteLayer
             var totalPixels = sz.Width * sz.Height;
             Point p = new Point(0, 0);
 
-            _pixels = new List<Pixel>(totalPixels);
-
-            for (int i = 0; i < totalPixels; i++)
+            _pixels = new Pixel[totalPixels];
+            int x = 0;
+            int y = 0;
+            var width = sz.Width;
+            for(int i = 0; i < totalPixels; i++)
             {
-                var pixel = new Pixel(p);
-                _pixels.Add(pixel);
-                p.X++;
-                if(p.X == sz.Width)
+
+                _pixels[i] = new Pixel(x, y);
+                x++;
+                if (x == sz.Width)
                 {
-                    p.X = 0;
-                    p.Y++;
+                    x = 0;
+                    y++;
                 }
             }
 
@@ -182,10 +201,9 @@ namespace SpriteLayer
 
         private void ResetPixelLayering()
         {
-            var reset = (Pixel p) =>
+            PixelActionDelegate reset = (ref Pixel p) =>
             {
-                p.Layers.Clear();
-                p.Layers.AddRange(Layers);
+                p.SetLayers(Layers);
             };
 
             ForEachPixelObject(reset);
@@ -228,38 +246,58 @@ namespace SpriteLayer
             }
         }
 
-        public Pixel GetPixel(Point p)
+        public Pixel this[Point p]
         {
-            var index = (p.Y * SpriteSheetSize.Width) + p.X;
-            return _pixels[index];
+            get
+            {
+                var index = (p.Y * SpriteSheetSize.Width) + p.X;
+                return _pixels[index];
+            }
         }
 
         private void Render()
         {
             var sz = SpriteSheetSize;
+            if((sz.Width == 0) || (sz.Height == 0))
+                return;
+
             // render the final image
             using Graphics g = Graphics.FromImage(_lastRender);
             g.FillRectangle(Brushes.Black, 0, 0, _lastRender.Width, _lastRender.Height);
-            int i = 0;
-            for (int y = 0; y < sz.Height; y++)
-            {
-                for(int x = 0; x < sz.Width; x++)
-                {
-                    _lastRender.SetPixel(x, y, _pixels[i].Color);
-                    i++;
-                }
-            }
+            var gdata = _lastRender.LockBits(new Rectangle(0, 0, sz.Width, sz.Height), System.Drawing.Imaging.ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            var bytes = Math.Abs(gdata.Stride) * gdata.Height;
+            byte[] rgbValues = new byte[bytes];
+            var dataPtr = gdata.Scan0;
+            System.Runtime.InteropServices.Marshal.Copy(dataPtr, rgbValues, 0, bytes);
 
-            if(RenderUpdate != null)
+            Parallel.For(0, bytes / 4, i =>
+            {
+                var colorIndex = i * 4;
+                var color = _pixels[i].Color;
+                rgbValues[colorIndex+0] = color.B;
+                rgbValues[colorIndex+1] = color.G;
+                rgbValues[colorIndex+2] = color.R;
+                rgbValues[colorIndex+3] = color.A;
+                i++;
+            });
+
+            System.Runtime.InteropServices.Marshal.Copy(rgbValues, 0, dataPtr, bytes);
+
+            _lastRender.UnlockBits(gdata);
+
+            if (RenderUpdate != null)
             {
                 RenderUpdate(_lastRender);
             }
         }
 
-        public List<Layer> PixelLayers(Point p)
+        public void Dispose()
         {
-            var index = (p.Y * SpriteSheetSize.Width) + p.X;
-            return _pixels[index].Layers;
+            foreach(var layer in Layers)
+            {
+                ((IDisposable)layer).Dispose();
+            }
+            ((IDisposable)_lastRender).Dispose();
         }
     }
 }

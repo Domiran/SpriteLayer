@@ -13,11 +13,11 @@ namespace SpriteLayer.Forms
     public partial class PixelLayerView : Form
     {
         private List<Pixel> _editingPixels;
-        private List<List<Layer>> _originalLayers;
-        private List<Layer> _layers;
+        private List<List<IReadOnlyLayer>> _originalLayers;
+        private List<IReadOnlyLayer> _layers;
         private Action _renderUpdate;
 
-        internal PixelLayerView(List<Pixel> editingPixels, Action renderUpdate)
+        public PixelLayerView(List<Pixel> editingPixels, Action renderUpdate)
         {
             InitializeComponent();
             layerList.DrawItem += LayerList_DrawItem;
@@ -25,10 +25,10 @@ namespace SpriteLayer.Forms
             layerList.ItemHeight = 255;
 
             // preserve all original layer setups because we mangle them during this
-            _originalLayers = new List<List<Layer>>(editingPixels.Count);
+            _originalLayers = new List<List<IReadOnlyLayer>>(editingPixels.Count);
             for(int i = 0; i < editingPixels.Count; i++)
             {
-                var list = new List<Layer>();
+                var list = new List<IReadOnlyLayer>();
                 list.AddRange(editingPixels[i].Layers);
                 _originalLayers.Add(list);
             }
@@ -36,7 +36,7 @@ namespace SpriteLayer.Forms
             // set up the layer list we'll work with
             // we'll use the first pixel selected as the list we use
             // we force all pixels to have a uniform ordering, ruining any custom ordering they had, but there's no good solution
-            _layers = new List<Layer>();
+            _layers = new List<IReadOnlyLayer>();
             foreach (var layer in editingPixels[0].Layers)
             {
                 _layers.Add(layer);
@@ -66,8 +66,7 @@ namespace SpriteLayer.Forms
         {
             for (int i = 0; i < _editingPixels.Count; i++)
             {
-                _editingPixels[i].Layers.Clear();
-                _editingPixels[i].Layers.AddRange(_originalLayers[i]);
+                _editingPixels[i].SetLayers(_originalLayers[i]);
             }
             _renderUpdate();
             this.Close();
@@ -107,12 +106,11 @@ namespace SpriteLayer.Forms
             }
         }
 
-        void UpdateAllPixelLayers(List<Layer> layers)
+        void UpdateAllPixelLayers(List<IReadOnlyLayer> layers)
         {
             foreach (var pixel in _editingPixels)
             {
-                pixel.Layers.Clear();
-                pixel.Layers.AddRange(layers);
+                pixel.SetLayers(layers);
             }
         }
     }

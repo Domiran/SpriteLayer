@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fileNewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -36,11 +37,14 @@
             this.fileSaveAsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportFinalSheetMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sheetMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.layerAddMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.layerRemoveMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
-            this.layerMoveLayerUpMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.layerMoveLayerDownMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.layerMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.layerMenuAdd = new System.Windows.Forms.ToolStripMenuItem();
+            this.layerMenuSep1 = new System.Windows.Forms.ToolStripSeparator();
+            this.layerMenuRemove = new System.Windows.Forms.ToolStripMenuItem();
+            this.layerMenuSetShade = new System.Windows.Forms.ToolStripMenuItem();
+            this.layerMenuSep2 = new System.Windows.Forms.ToolStripSeparator();
+            this.layerMenuMoveUp = new System.Windows.Forms.ToolStripMenuItem();
+            this.layerMenuMoveDown = new System.Windows.Forms.ToolStripMenuItem();
             this.viewsTabs = new System.Windows.Forms.TabControl();
             this.tabLayers = new System.Windows.Forms.TabPage();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
@@ -58,6 +62,7 @@
             this.frameNumberLabel = new System.Windows.Forms.Label();
             this.frameNumberField = new System.Windows.Forms.NumericUpDown();
             this.menuStrip1.SuspendLayout();
+            this.layerMenu.SuspendLayout();
             this.viewsTabs.SuspendLayout();
             this.tabLayers.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -101,79 +106,101 @@
             // fileNewMenuItem
             // 
             this.fileNewMenuItem.Name = "fileNewMenuItem";
-            this.fileNewMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.fileNewMenuItem.Size = new System.Drawing.Size(177, 22);
             this.fileNewMenuItem.Text = "&New";
             this.fileNewMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click);
             // 
             // fileOpenMenuItem
             // 
             this.fileOpenMenuItem.Name = "fileOpenMenuItem";
-            this.fileOpenMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.fileOpenMenuItem.Size = new System.Drawing.Size(177, 22);
             this.fileOpenMenuItem.Text = "&Open...";
             this.fileOpenMenuItem.Visible = false;
             // 
             // fileSaveMenuItem
             // 
             this.fileSaveMenuItem.Name = "fileSaveMenuItem";
-            this.fileSaveMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.fileSaveMenuItem.Size = new System.Drawing.Size(177, 22);
             this.fileSaveMenuItem.Text = "&Save";
             this.fileSaveMenuItem.Visible = false;
             // 
             // fileSaveAsMenuItem
             // 
             this.fileSaveAsMenuItem.Name = "fileSaveAsMenuItem";
-            this.fileSaveAsMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.fileSaveAsMenuItem.Size = new System.Drawing.Size(177, 22);
             this.fileSaveAsMenuItem.Text = "Save &As...";
             this.fileSaveAsMenuItem.Visible = false;
             // 
             // exportFinalSheetMenuItem
             // 
             this.exportFinalSheetMenuItem.Name = "exportFinalSheetMenuItem";
-            this.exportFinalSheetMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exportFinalSheetMenuItem.Size = new System.Drawing.Size(177, 22);
             this.exportFinalSheetMenuItem.Text = "Export Final Sheet...";
             this.exportFinalSheetMenuItem.Click += new System.EventHandler(this.exportFinalSheetMenuItem_Click);
             // 
             // sheetMenuItem
             // 
-            this.sheetMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.layerAddMenuItem,
-            this.layerRemoveMenuItem,
-            this.toolStripMenuItem1,
-            this.layerMoveLayerUpMenuItem,
-            this.layerMoveLayerDownMenuItem});
+            this.sheetMenuItem.DropDown = this.layerMenu;
             this.sheetMenuItem.Name = "sheetMenuItem";
             this.sheetMenuItem.Size = new System.Drawing.Size(47, 20);
             this.sheetMenuItem.Text = "Layer";
             // 
-            // layerAddMenuItem
+            // layerMenu
             // 
-            this.layerAddMenuItem.Name = "layerAddMenuItem";
-            this.layerAddMenuItem.Size = new System.Drawing.Size(195, 22);
-            this.layerAddMenuItem.Text = "Add New Layer...";
-            this.layerAddMenuItem.Click += new System.EventHandler(this.layerAddMenuItem_Click);
+            this.layerMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.layerMenuAdd,
+            this.layerMenuSep1,
+            this.layerMenuRemove,
+            this.layerMenuSetShade,
+            this.layerMenuSep2,
+            this.layerMenuMoveUp,
+            this.layerMenuMoveDown});
+            this.layerMenu.Name = "layerMenu";
+            this.layerMenu.Size = new System.Drawing.Size(139, 126);
             // 
-            // layerRemoveMenuItem
+            // layerMenuAdd
             // 
-            this.layerRemoveMenuItem.Name = "layerRemoveMenuItem";
-            this.layerRemoveMenuItem.Size = new System.Drawing.Size(195, 22);
-            this.layerRemoveMenuItem.Text = "Remove Selected Layer";
+            this.layerMenuAdd.Name = "layerMenuAdd";
+            this.layerMenuAdd.Size = new System.Drawing.Size(138, 22);
+            this.layerMenuAdd.Text = "Add Layer...";
             // 
-            // toolStripMenuItem1
+            // layerMenuSep1
             // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(192, 6);
+            this.layerMenuSep1.Name = "layerMenuSep1";
+            this.layerMenuSep1.Size = new System.Drawing.Size(135, 6);
             // 
-            // layerMoveLayerUpMenuItem
+            // layerMenuRemove
             // 
-            this.layerMoveLayerUpMenuItem.Name = "layerMoveLayerUpMenuItem";
-            this.layerMoveLayerUpMenuItem.Size = new System.Drawing.Size(195, 22);
-            this.layerMoveLayerUpMenuItem.Text = "Move Up";
+            this.layerMenuRemove.Name = "layerMenuRemove";
+            this.layerMenuRemove.Size = new System.Drawing.Size(138, 22);
+            this.layerMenuRemove.Text = "Remove";
             // 
-            // layerMoveLayerDownMenuItem
+            // layerMenuSetShade
             // 
-            this.layerMoveLayerDownMenuItem.Name = "layerMoveLayerDownMenuItem";
-            this.layerMoveLayerDownMenuItem.Size = new System.Drawing.Size(195, 22);
-            this.layerMoveLayerDownMenuItem.Text = "Move Down";
+            this.layerMenuSetShade.Name = "layerMenuSetShade";
+            this.layerMenuSetShade.Size = new System.Drawing.Size(138, 22);
+            this.layerMenuSetShade.Text = "Set Shade...";
+            // 
+            // layerMenuSep2
+            // 
+            this.layerMenuSep2.Name = "layerMenuSep2";
+            this.layerMenuSep2.Size = new System.Drawing.Size(135, 6);
+            // 
+            // layerMenuMoveUp
+            // 
+            this.layerMenuMoveUp.Name = "layerMenuMoveUp";
+            this.layerMenuMoveUp.Size = new System.Drawing.Size(138, 22);
+            this.layerMenuMoveUp.Text = "Move Up";
+            this.layerMenuMoveUp.ToolTipText = "Move the global ordering of the selected  layer up.\r\n\r\nThis resets custom order o" +
+    "n every pixel.";
+            // 
+            // layerMenuMoveDown
+            // 
+            this.layerMenuMoveDown.Name = "layerMenuMoveDown";
+            this.layerMenuMoveDown.Size = new System.Drawing.Size(138, 22);
+            this.layerMenuMoveDown.Text = "Move Down";
+            this.layerMenuMoveDown.ToolTipText = "Move the global ordering of the selected  layer down.\r\n\r\nThis resets custom order" +
+    " on every pixel.\r\n";
             // 
             // viewsTabs
             // 
@@ -218,6 +245,8 @@
             // 
             // layerList
             // 
+            this.layerList.ContextMenuStrip = this.layerMenu;
+            this.layerList.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.layerList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.layerList.FormattingEnabled = true;
             this.layerList.ItemHeight = 15;
@@ -228,6 +257,7 @@
             // 
             // layerView
             // 
+            this.layerView.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.layerView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.layerView.Location = new System.Drawing.Point(0, 0);
             this.layerView.Name = "layerView";
@@ -404,9 +434,10 @@
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "LayeredSpriteEditor";
-            this.Text = "Form1";
+            this.Text = "Pixel Layer";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.layerMenu.ResumeLayout(false);
             this.viewsTabs.ResumeLayout(false);
             this.tabLayers.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);
@@ -439,11 +470,6 @@
         private TabControl viewsTabs;
         private TabPage tabLayers;
         private TabPage tabFinalSheet;
-        private ToolStripMenuItem layerAddMenuItem;
-        private ToolStripMenuItem layerRemoveMenuItem;
-        private ToolStripSeparator toolStripMenuItem1;
-        private ToolStripMenuItem layerMoveLayerUpMenuItem;
-        private ToolStripMenuItem layerMoveLayerDownMenuItem;
         private ListBox layerList;
         private Forms.NearestNeighorPictureBox finalSheetView;
         private SplitContainer splitContainer1;
@@ -459,5 +485,13 @@
         private Label frameNumberLabel;
         private NumericUpDown frameNumberField;
         private Button frameSizeApply;
+        private ContextMenuStrip layerMenu;
+        private ToolStripMenuItem layerMenuAdd;
+        private ToolStripSeparator layerMenuSep1;
+        private ToolStripMenuItem layerMenuRemove;
+        private ToolStripMenuItem layerMenuSetShade;
+        private ToolStripSeparator layerMenuSep2;
+        private ToolStripMenuItem layerMenuMoveUp;
+        private ToolStripMenuItem layerMenuMoveDown;
     }
 }
